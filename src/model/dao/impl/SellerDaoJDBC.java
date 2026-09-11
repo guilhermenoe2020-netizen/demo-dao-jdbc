@@ -21,19 +21,19 @@ public class SellerDaoJDBC implements SellerDao{
 	
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void update(Seller obj) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void deleById(Integer id) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -51,18 +51,9 @@ public class SellerDaoJDBC implements SellerDao{
 		st.setInt(1, id);
 		rs = st.executeQuery();
 		if(rs.next()) {
-			Department dep = new Department();
-			dep.setId(rs.getInt("DepartmentId"));
-			dep.setName(rs.getString("DepName"));
-			
-			Seller obj = new Seller();
-		    obj.setId(rs.getInt("Id"));
-			obj.setName(rs.getString("Name"));
-			obj.setEmail(rs.getString("Email"));
-			obj.setBaseSalary(rs.getDouble("BaseSalary"));
-			obj.setBirthDate(rs.getDate("BirthDate"));
-			obj.setDepartment(dep);
-			return obj;
+			Department dep = instantiateDepartment(rs);
+			Seller obj = instantiateSeller(rs, dep);
+	        return obj;  
 		}
 		return null;
 		
@@ -72,9 +63,42 @@ public class SellerDaoJDBC implements SellerDao{
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
+	}
 	
+	
+
+	/**
+	 * Converte uma linha do ResultSet em um objeto Seller (Vendedor)
+	 * e associa ao seu respectivo Departamento
+	 * 
+	 * rs = O conjunto de resultados do banco de dados
+	 * dep = O departamento ao qual o vendedor pertence
+	 * retorna Um objeto Seller populado com os dados do banco
+	 * throws = SQLException Se ocorrer algum erro ao ler as colunas do ResultSet
+	 */
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws  SQLException {
+		Seller obj = new Seller();
+		obj.setId(rs.getInt("Id"));
+		obj.setName(rs.getString("Name"));
+		obj.setEmail(rs.getString("Email"));
+		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setBirthDate(rs.getDate("BirthDate"));
+		obj.setDepartment(dep);
+		return obj;
 	}
 
+	/**
+	 * Converte uma linha do ResultSet em um objeto Department (Departamento)
+	 * retorna Um objeto Department populado com os dados do banco
+	 * **/
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName")); 
+		return dep;
+	}
+
+	
 	@Override
 	public List<Seller> findAll() {
 		// TODO Auto-generated method stub
