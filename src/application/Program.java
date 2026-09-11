@@ -16,15 +16,22 @@ public class Program {
 		SellerDao sellerDao = DaoFactory.createSellerDao();
 		
 		System.out.println("== test 1: seller findById ==");
-		System.out.println("\n== test 2: seller findByDepartment ==");
 		Seller seller = sellerDao.findById(3);
+		System.out.println(seller);
+		
+		System.out.println("\n== test 2: seller findByDepartment ==");
 		Department department = new Department(1, null);
 		List<Seller> list = sellerDao.findByDepartment(department);
-		
 		for(Seller obj : list) {
 			System.out.println(obj);
 		}
 
+		System.out.println("\n== test 3: seller findAll ==");
+	    list = sellerDao.findAll();
+		for(Seller obj : list) {
+			System.out.println(obj);
+		}
+		
 	}
 
 }

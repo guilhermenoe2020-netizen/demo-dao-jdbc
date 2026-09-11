@@ -126,10 +126,57 @@ public class SellerDaoJDBC implements SellerDao{
 	}
 
 	
+	/**
+	 * Busca todos os vendedores cadastrados no banco de dados,
+	 * juntamente com seus respectivos departamentos
+	 *
+	 * A consulta utiliza INNER JOIN para relacionar as tabelas
+	 * Seller e Department. Os registros retornados são convertidos
+	 * em objetos Seller e armazenados em uma lista
+	 *
+	 * O Map é utilizado para reutilizar os objetos Department já
+	 * criados, evitando a criação desnecessária de instâncias
+	 * repetidas para o mesmo departamento
+	 *
+	 * @return lista contendo todos os vendedores cadastrados
+	 * e seus respectivos departamentos
+	 */
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement(
+					"SELECT seller.*, department.Name as DepName " 
+					+ "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id "
+					+ "ORDER BY Name");
+	
+		rs = st.executeQuery();
+		List<Seller> list = new ArrayList<>();
+		Map<Integer, Department> map = new HashMap<>();
+		
+		while(rs.next()) {
+			
+			Department dep = map.get(rs.getInt("departmentId"));
+			
+			if(dep == null) {
+				dep = instantiateDepartment(rs);
+				map.put(rs.getInt("departmentId"), dep);
+				
+			}
+			
+			Seller obj = instantiateSeller(rs, dep);
+	        list.add(obj);  
+		}
+		return list;
+		
+		}catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
 
 	/**
