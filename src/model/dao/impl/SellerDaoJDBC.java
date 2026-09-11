@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import db.DB;
 import db.DbException;
@@ -19,24 +22,46 @@ public class SellerDaoJDBC implements SellerDao{
 		this.conn = conn;
 	}
 	
+	/**
+	 * Insere um novo vendedor no banco de dados.
+	 *
+	 * @param obj vendedor que será inserido
+	 */
 	@Override
 	public void insert(Seller obj) {
 		
 		
 	}
 
+	/**
+	 * Atualiza os dados de um vendedor existente.
+	 *
+	 * @param obj vendedor que será atualizado
+	 */
 	@Override
 	public void update(Seller obj) {
 		
-		
+	/**
+	 * Remove um vendedor pelo seu identificador.
+	 *
+	 * @param id identificador do vendedor
+	*/	
 	}
 
 	@Override
-	public void deleById(Integer id) {
-		
-		
+	public void deleteById(Integer id) {
+			
 	}
 
+	/**
+	 * Busca um vendedor pelo seu identificador.
+	 *
+	 * Realiza um INNER JOIN com a tabela Department para obter
+	 * também os dados do departamento ao qual o vendedor pertence.
+	 *
+	 * @param id identificador do vendedor
+	 * @return vendedor encontrado ou null caso não exista
+	 */
 	@Override
 	public Seller findById(Integer id) {
 		PreparedStatement st = null;
@@ -68,13 +93,12 @@ public class SellerDaoJDBC implements SellerDao{
 	
 
 	/**
-	 * Converte uma linha do ResultSet em um objeto Seller (Vendedor)
-	 * e associa ao seu respectivo Departamento
-	 * 
-	 * rs = O conjunto de resultados do banco de dados
-	 * dep = O departamento ao qual o vendedor pertence
-	 * retorna Um objeto Seller populado com os dados do banco
-	 * throws = SQLException Se ocorrer algum erro ao ler as colunas do ResultSet
+	 * Cria um objeto Seller a partir dos dados obtidos do ResultSet.
+	 *
+	 * @param rs resultado da consulta ao banco de dados
+	 * @param dep departamento associado ao vendedor
+	 * @return objeto Seller preenchido com os dados do banco
+	 * @throws SQLException caso ocorra um erro ao acessar os dados
 	 */
 	private Seller instantiateSeller(ResultSet rs, Department dep) throws  SQLException {
 		Seller obj = new Seller();
@@ -88,9 +112,12 @@ public class SellerDaoJDBC implements SellerDao{
 	}
 
 	/**
-	 * Converte uma linha do ResultSet em um objeto Department (Departamento)
-	 * retorna Um objeto Department populado com os dados do banco
-	 * **/
+	 * Cria um objeto Department a partir dos dados obtidos do ResultSet.
+	 *
+	 * @param rs resultado da consulta ao banco de dados
+	 * @return objeto Department preenchido com os dados do banco
+	 * @throws SQLException caso ocorra um erro ao acessar os dados
+	 */
 	private Department instantiateDepartment(ResultSet rs) throws SQLException {
 		Department dep = new Department();
 		dep.setId(rs.getInt("DepartmentId"));
@@ -103,6 +130,55 @@ public class SellerDaoJDBC implements SellerDao{
 	public List<Seller> findAll() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * Busca todos os vendedores pertencentes a um determinado departamento.
+	 *
+	 * Os departamentos são armazenados em um Map para evitar a criação
+	 * repetida do mesmo objeto Department durante a consulta.
+	 *
+	 * @param department departamento utilizado como filtro
+	 * @return lista de vendedores pertencentes ao departamento
+	 */
+	@Override
+	public List<Seller> findByDepartment(Department department) {
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement(
+					"SELECT seller.*, department.Name as DepName " 
+					+ "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id "
+					+ "WHERE DepartmentId = ? "
+					+ "ORDER BY Name");
+		
+		st.setInt(1, department.getId());
+		rs = st.executeQuery();
+		List<Seller> list = new ArrayList<>();
+		Map<Integer, Department> map = new HashMap<>();
+		
+		while(rs.next()) {
+			
+			Department dep = map.get(rs.getInt("departmentId"));
+			
+			if(dep == null) {
+				dep = instantiateDepartment(rs);
+				map.put(rs.getInt("departmentId"), dep);
+				
+			}
+			
+			Seller obj = instantiateSeller(rs, dep);
+	        list.add(obj);  
+		}
+		return list;
+		
+		}catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
 
 }
