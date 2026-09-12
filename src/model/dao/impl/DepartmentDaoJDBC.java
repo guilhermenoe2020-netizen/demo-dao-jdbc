@@ -11,20 +11,12 @@ import db.DB;
 import db.DbException;
 import model.dao.DepartmentDao;
 import model.entities.Department;
-import model.entities.Seller;
 
 public class DepartmentDaoJDBC implements DepartmentDao {
 	
 	private Connection conn;
 	public DepartmentDaoJDBC(Connection conn){
 		this.conn = conn;
-	}
-	
-	private Department instantiateDepartment(ResultSet rs) throws SQLException {
-		Department dep = new Department();
-		dep.setId(rs.getInt("DepartmentId"));
-		dep.setName(rs.getString("DepName")); 
-		return dep;
 	}
 
 	@Override
@@ -47,10 +39,29 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
 	@Override
 	public Department findById(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement("SELECT * FROM department WHERE Id = ?");
+			
+			st.setInt(1, id);
+			rs = st.executeQuery();
+			
+			if(rs.next()) {
+				Department obj = new Department();
+				obj.setId(rs.getInt("id"));
+				obj.setName(rs.getString("Name"));
+		        return obj;  
+			}
+			 return null;
+			
+			}catch(SQLException e) {
+				throw new DbException(e.getMessage());
+			 }finally {
+				DB.closeStatement(st);
+				DB.closeResultSet(rs);
+			  }
+		 }
 	
 	@Override
 	public List<Department> findAll() {

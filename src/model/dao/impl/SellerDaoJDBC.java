@@ -161,8 +161,6 @@ public class SellerDaoJDBC implements SellerDao{
 		}
 	}
 	
-	
-
 	/**
 	 * Cria um objeto Seller a partir dos dados obtidos do ResultSet.
 	 *
