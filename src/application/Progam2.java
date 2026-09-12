@@ -27,12 +27,23 @@ public class Progam2 {
 		Department department = departmentDao.findById(1);
 		System.out.println(department);
 		
-		System.out.println("\n== test 3: delete ==");
+		
+		System.out.println("\n== test 3: update ==");
+		department = departmentDao.findById(1);
+		department.setName("pc");
+		departmentDao.update(department);
+		System.out.println("Update completed");
+		
+		
+		
+		
+		
+		
+		System.out.println("\n== test 4 : delete ==");
 		System.out.println("Enter id for delete test");
 		int id = sc.nextInt();
 		departmentDao.deleteById(id);
 		System.out.println("delet completed");
-		
 		sc.close();
 	}
 }
