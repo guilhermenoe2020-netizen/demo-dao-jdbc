@@ -136,9 +136,3 @@ Exemplo de situação tratada por `DbIntegrityException`:
 
 Este projeto foi desenvolvido durante meus estudos de **Java e Programação Orientada a Objetos**,
 com base no curso do [DevSuperior](https://devsuperior.com.br/)
-
-# Autor
-
-Guilherme Noé
-
-https://www.linkedin.com/in/guilherme-no%C3%A9-636a73336
